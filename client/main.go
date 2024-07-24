@@ -46,17 +46,22 @@ func readMessageFromServer(conn net.Conn, wg *sync.WaitGroup){
     for {
         message, err := reader.ReadString('\n')
         handleError(err, "Error reading message from server")
-        fmt.Printf("message from the server is %s", message)
+        fmt.Printf("%s", message)
     }
 }
 
 func main() {
+    // creating a connection with the server
 	conn, err := net.Dial("tcp", "localhost:2000")
 	handleError(err, "Error connecting to server")
 
-    wg := new(sync.WaitGroup)
-    wg.Add(1)
-	go sendMessageToServer(conn, wg)
-    go readMessageFromServer(conn, wg)
+    var wg sync.WaitGroup
+    wg.Add(2)
+
+    // sending message to the server
+	go sendMessageToServer(conn, &wg)
+
+    // reading message from the server
+    go readMessageFromServer(conn, &wg)
     wg.Wait()
 }
